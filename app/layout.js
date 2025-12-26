@@ -40,9 +40,13 @@ export default function RootLayout({ children }) {
         <ThemeProvider>
           <AuthProvider>
             <NotificationProvider>
-              <main id="main" role="main">
-                {children}
-              </main>
+              <TransactionProvider>
+                <BalanceProvider>
+                  <main id="main" role="main">
+                    {children}
+                  </main>
+                </BalanceProvider>
+              </TransactionProvider>
             </NotificationProvider>
           </AuthProvider>
         </ThemeProvider>

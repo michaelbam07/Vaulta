@@ -1,6 +1,9 @@
 "use client"
 
 import { useState } from "react"
+import { useTransactions } from "@/context/TransactionContext"
+import Skeleton from "@/components/ui/Skeleton"
+
 
 const transactionsData = [
   { id: "1", date: "2025-12-15", description: "Salary", type: "Credit", amount: 450000, status: "Success" },
@@ -16,7 +19,11 @@ export default function TransactionsTable() {
   const [sortField, setSortField] = useState("date")
   const [sortOrder, setSortOrder] = useState("desc")
 
-  const filtered = transactionsData
+  const { transactions } = useTransactions()
+  const data = transactions.length > 0 ? transactions : transactionsData
+
+
+  const filtered = data
     .filter((tx) => {
       return (
         (typeFilter === "All" || tx.type === typeFilter) &&
@@ -36,6 +43,22 @@ export default function TransactionsTable() {
       if (aValue > bValue) return sortOrder === "asc" ? 1 : -1
       return 0
     })
+
+    const [loading, setLoading] = useState(true)
+
+useEffect(() => {
+  const t = setTimeout(() => setLoading(false), 600)
+  return () => clearTimeout(t)
+}, [])
+  if (loading) {
+    return (
+      <div aria-busy="true" aria-live="polite">
+        <Skeleton className="h-4 w-full" />
+        <Skeleton className="h-4 w-full mt-2" />
+        <Skeleton className="h-4 w-full mt-2" />
+      </div>
+    )
+  }
 
   return (
     <section aria-labelledby="transactions-heading">
