@@ -12,7 +12,7 @@ import {
   CartesianGrid,
 } from "recharts"
 import { useTransactions } from "@/context/TransactionContext"
-import Skeleton from "@/components/ui/Skeleton"
+import { Skeleton } from "@/components/ui/skeleton"
 
 
 const DAYS = ["Sun", "Mon", "Tue", "Wed", "Thu", "Fri", "Sat"]

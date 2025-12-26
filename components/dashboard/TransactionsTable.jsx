@@ -2,7 +2,7 @@
 
 import { useState } from "react"
 import { useTransactions } from "@/context/TransactionContext"
-import Skeleton from "@/components/ui/Skeleton"
+import { Skeleton } from "@/components/ui/skeleton"
 
 
 const transactionsData = [
