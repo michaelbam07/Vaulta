@@ -2,13 +2,12 @@
 
 import { useState, useMemo } from "react"
 import {
-  LineChart,
-  Line,
+  AreaChart,
+  Area,
   XAxis,
   YAxis,
   Tooltip,
   ResponsiveContainer,
-  Legend,
   CartesianGrid,
 } from "recharts"
 import { useTransactions } from "@/context/TransactionContext"
@@ -23,16 +22,11 @@ export default function IncomeExpensesChart() {
 
   const loading = transactions.length === 0
 
-  // ✅ DATA ONLY
   const data = useMemo(() => {
     const map = {}
-
     transactions.forEach((tx) => {
       const date = new Date(tx.date)
-      const label =
-        view === "weekly"
-          ? DAYS[date.getDay()]
-          : MONTHS[date.getMonth()]
+      const label = view === "weekly" ? DAYS[date.getDay()] : MONTHS[date.getMonth()]
 
       if (!map[label]) {
         map[label] = { label, income: 0, expenses: 0 }
@@ -44,84 +38,95 @@ export default function IncomeExpensesChart() {
         map[label].expenses += tx.amount
       }
     })
-
     return Object.values(map)
   }, [transactions, view])
 
   return (
     <section
       aria-labelledby="income-expenses-heading"
-      className="rounded-2xl border border-zinc-200 dark:border-zinc-700 bg-white dark:bg-zinc-800 p-6 shadow-sm"
+      className="rounded-2xl border border-border bg-card p-6 shadow-sm"
     >
-      {/* Header */}
-      <div className="flex items-center justify-between mb-4">
-        <h3 id="income-expenses-heading" className="text-lg font-medium">
-          Income vs Expenses
-        </h3>
+      <div className="flex items-center justify-between mb-8">
+        <div>
+          <h3 id="income-expenses-heading" className="text-sm font-bold uppercase tracking-wider text-muted-foreground">
+            Financial Analytics
+          </h3>
+          <p className="text-2xl font-bold text-foreground">Cash Flow</p>
+        </div>
 
-        <div
-          role="group"
-          aria-label="Select chart view"
-          className="flex rounded-lg border border-zinc-200 dark:border-zinc-700 overflow-hidden"
-        >
-          <button
-            type="button"
-            aria-pressed={view === "weekly"}
-            onClick={() => setView("weekly")}
-            className={`px-3 py-1.5 text-sm focus-visible:ring-2 focus-visible:ring-blue-600 ${
-              view === "weekly"
-                ? "bg-zinc-900 text-white dark:bg-zinc-100 dark:text-zinc-900"
-                : "text-zinc-600 dark:text-zinc-300"
-            }`}
-          >
-            Weekly
-          </button>
-
-          <button
-            type="button"
-            aria-pressed={view === "monthly"}
-            onClick={() => setView("monthly")}
-            className={`px-3 py-1.5 text-sm focus-visible:ring-2 focus-visible:ring-blue-600 ${
-              view === "monthly"
-                ? "bg-zinc-900 text-white dark:bg-zinc-100 dark:text-zinc-900"
-                : "text-zinc-600 dark:text-zinc-300"
-            }`}
-          >
-            Monthly
-          </button>
+        <div className="flex bg-muted p-1 rounded-lg border border-border">
+          {["weekly", "monthly"].map((v) => (
+            <button
+              key={v}
+              onClick={() => setView(v)}
+              className={`px-4 py-1 text-xs font-bold rounded-md transition-all ${
+                view === v 
+                ? "bg-card text-primary shadow-sm" 
+                : "text-muted-foreground hover:text-foreground"
+              }`}
+            >
+              {v.charAt(0).toUpperCase() + v.slice(1)}
+            </button>
+          ))}
         </div>
       </div>
 
-      {/* ✅ Skeleton OR Chart */}
       {loading ? (
-        <Skeleton className="h-[300px] w-full" />
+        <Skeleton className="h-[300px] w-full bg-muted/50 rounded-xl" />
       ) : (
-        <ResponsiveContainer width="100%" height={300}>
-          <LineChart data={data}>
-            <CartesianGrid strokeDasharray="3 3" />
-            <XAxis dataKey="label" />
-            <YAxis />
-            <Tooltip />
-            <Legend />
-
-            <Line
-              type="monotone"
-              dataKey="income"
-              name="Income"
-              stroke="#15803d"
-              strokeWidth={2}
-              dot={false}
-            />
-            <Line
-              type="monotone"
-              dataKey="expenses"
-              name="Expenses"
-              stroke="#b91c1c"
-              strokeWidth={2}
-              dot={false}
-            />
-          </LineChart>
-        </ResponsiveContainer>
+        <div className="h-[300px] w-full">
+          <ResponsiveContainer width="100%" height="100%">
+            <AreaChart data={data} margin={{ top: 10, right: 10, left: -20, bottom: 0 }}>
+              <defs>
+                <linearGradient id="colorIncome" x1="0" y1="0" x2="0" y2="1">
+                  <stop offset="5%" stopColor="var(--color-secondary)" stopOpacity={0.3}/>
+                  <stop offset="95%" stopColor="var(--color-secondary)" stopOpacity={0}/>
+                </linearGradient>
+                <linearGradient id="colorExpenses" x1="0" y1="0" x2="0" y2="1">
+                  <stop offset="5%" stopColor="var(--color-primary)" stopOpacity={0.1}/>
+                  <stop offset="95%" stopColor="var(--color-primary)" stopOpacity={0}/>
+                </linearGradient>
+              </defs>
+              <CartesianGrid strokeDasharray="3 3" vertical={false} stroke="oklch(var(--border))" opacity={0.5} />
+              <XAxis 
+                dataKey="label" 
+                axisLine={false} 
+                tickLine={false} 
+                tick={{ fill: 'oklch(var(--muted-foreground))', fontSize: 12 }}
+                dy={10}
+              />
+              <YAxis 
+                axisLine={false} 
+                tickLine={false} 
+                tick={{ fill: 'oklch(var(--muted-foreground))', fontSize: 12 }}
+              />
+              <Tooltip 
+                contentStyle={{ 
+                  backgroundColor: 'oklch(var(--card))', 
+                  border: '1px solid oklch(var(--border))',
+                  borderRadius: '12px',
+                  boxShadow: '0 4px 12px rgba(0,0,0,0.1)'
+                }}
+              />
+              <Area
+                type="monotone"
+                dataKey="income"
+                stroke="var(--color-secondary)"
+                strokeWidth={3}
+                fillOpacity={1}
+                fill="url(#colorIncome)"
+              />
+              <Area
+                type="monotone"
+                dataKey="expenses"
+                stroke="var(--color-primary)"
+                strokeWidth={3}
+                fillOpacity={1}
+                fill="url(#colorExpenses)"
+              />
+            </AreaChart>
+          </ResponsiveContainer>
+        </div>
       )}
     </section>
   )

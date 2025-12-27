@@ -1,35 +1,48 @@
 "use client"
+
 import Link from "next/link"
 import { usePathname } from "next/navigation"
 import {
-  Home,
-  CreditCard,
-  ArrowLeftRight,
+  LayoutDashboard,
+  ArrowRightLeft,
+  ReceiptText,
   Settings,
+  ShieldCheck,
+  TrendingUp
 } from "lucide-react"
 
 const navItems = [
-  { name: "Dashboard", href: "/dashboard", icon: Home },
-  { name: "Transactions", href: "/dashboard/transactions", icon: CreditCard },
-  { name: "Transfer", href: "/dashboard/transfer", icon: ArrowLeftRight },
+  { name: "Dashboard", href: "/dashboard", icon: LayoutDashboard },
+  { name: "Transactions", href: "/dashboard/transactions", icon: ReceiptText },
+  { name: "Transfer", href: "/dashboard/transfer", icon: ArrowRightLeft },
+  { name: "Analytics", href: "/dashboard/analytics", icon: TrendingUp },
   { name: "Settings", href: "/dashboard/settings", icon: Settings },
 ]
 
-export default function Sidebar({ onNavigate }) {
+export default function Sidebar({ onNavigate, isMobile }) {
   const pathname = usePathname()
 
   return (
     <aside
       aria-label="Primary navigation"
-      className="flex h-full flex-col bg-white dark:bg-zinc-900 border-r border-zinc-200 dark:border-zinc-700"
+      className={`flex h-full flex-col border-r border-border transition-all duration-300
+        ${isMobile ? "bg-primary text-white" : "bg-card text-foreground"}`}
     >
-      {/* Brand */}
-      <div className="h-16 flex items-center px-6 font-semibold text-lg border-b border-zinc-200 dark:border-zinc-700">
-        Vaulta
+      {/* Brand Section */}
+      <div className="h-20 flex items-center px-6 gap-3">
+        <div className="h-10 w-10 rounded-xl bg-primary flex items-center justify-center shadow-lg shadow-primary/20 group cursor-pointer border border-primary-foreground/10">
+           <span className="text-white font-black text-2xl italic group-hover:scale-110 transition-transform">V</span>
+        </div>
+        {!isMobile && (
+          <div className="flex flex-col">
+            <span className="font-black tracking-tighter text-xl leading-none">Vaulta</span>
+            <span className="text-[10px] uppercase tracking-widest text-muted-foreground font-bold">Financial Vault</span>
+          </div>
+        )}
       </div>
 
-      {/* Navigation */}
-      <nav className="flex-1 px-3 py-4 space-y-1">
+      {/* Navigation Links */}
+      <nav className="flex-1 px-4 py-6 space-y-2">
         {navItems.map((item) => {
           const isActive = pathname === item.href
 
@@ -39,24 +52,42 @@ export default function Sidebar({ onNavigate }) {
               href={item.href}
               onClick={onNavigate}
               aria-current={isActive ? "page" : undefined}
-              className={`flex items-center gap-3 rounded-lg px-3 py-2 text-sm
-                focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-blue-600
-                ${
-                  isActive
-                    ? "bg-zinc-100 text-zinc-900 dark:bg-zinc-800 dark:text-white font-medium"
-                    : "text-zinc-700 dark:text-zinc-300 hover:bg-zinc-100 dark:hover:bg-zinc-800"
+              className={`group flex items-center gap-3 rounded-xl px-4 py-3 text-sm font-bold transition-all
+                ${isActive 
+                  ? "bg-primary text-white shadow-md shadow-primary/20" 
+                  : "text-muted-foreground hover:bg-muted hover:text-primary"
                 }`}
             >
-              <item.icon
-                className="h-4 w-4"
-                aria-hidden="true"
-                focusable="false"
-              />
+              <div className={`transition-colors ${isActive ? "text-secondary" : "group-hover:text-primary"}`}>
+                <item.icon size={18} aria-hidden="true" />
+              </div>
               <span>{item.name}</span>
+              
+              {isActive && (
+                <div className="ml-auto h-1.5 w-1.5 rounded-full bg-secondary animate-pulse" />
+              )}
             </Link>
           )
         })}
       </nav>
+
+      {/* Footer Branding / Support */}
+      <div className="p-4 mt-auto">
+        <div className={`rounded-2xl p-4 flex items-center gap-3 border transition-colors
+          ${isMobile ? "bg-white/5 border-white/10" : "bg-muted/50 border-border"}`}>
+          <div className="h-8 w-8 rounded-full bg-secondary/20 flex items-center justify-center text-secondary">
+            <ShieldCheck size={16} />
+          </div>
+          <div className="flex flex-col">
+            <span className={`text-[10px] font-bold uppercase tracking-wider ${isMobile ? "text-white/60" : "text-muted-foreground"}`}>
+              Security Level
+            </span>
+            <span className={`text-xs font-bold ${isMobile ? "text-white" : "text-foreground"}`}>
+              Grade A+
+            </span>
+          </div>
+        </div>
+      </div>
     </aside>
   )
 }

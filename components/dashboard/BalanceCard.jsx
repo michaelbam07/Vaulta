@@ -1,7 +1,7 @@
 "use client"
 
 import { useState } from "react"
-import { Eye, EyeOff } from "lucide-react"
+import { Eye, EyeOff, TrendingUp } from "lucide-react"
 import { useBalance } from "@/context/BalanceContext"
 
 export default function BalanceCard() {
@@ -11,37 +11,56 @@ export default function BalanceCard() {
   return (
     <section
       aria-labelledby="balance-heading"
-      className="rounded-2xl border border-zinc-200 dark:border-zinc-700 bg-white dark:bg-zinc-800 p-6 shadow-sm"
+      className="rounded-2xl border border-border bg-card p-6 shadow-sm relative overflow-hidden group transition-all hover:shadow-md"
     >
-      <div className="flex items-center justify-between mb-2">
-        <h2 id="balance-heading" className="text-sm text-zinc-500">
-          Account Balance
-        </h2>
+      {/* Subtle brand accent - a small decorative glow in the corner */}
+      <div className="absolute -right-4 -top-4 h-24 w-24 rounded-full bg-secondary/5 blur-3xl group-hover:bg-secondary/10 transition-colors" />
+
+      <div className="flex items-center justify-between mb-4">
+        <div className="flex items-center gap-2">
+           <div className="p-1.5 rounded-md bg-primary/5 text-primary dark:bg-primary/20">
+              <TrendingUp size={14} />
+           </div>
+           <h2 id="balance-heading" className="text-xs font-bold uppercase tracking-widest text-muted-foreground">
+            Total Balance
+          </h2>
+        </div>
 
         <button
           type="button"
           onClick={() => setHidden(!hidden)}
           aria-label={hidden ? "Show balance" : "Hide balance"}
-          className="text-zinc-500 hover:text-zinc-700 dark:hover:text-zinc-300
-            focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-blue-600 rounded"
+          className="text-muted-foreground hover:text-primary transition-colors
+            focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-secondary rounded-full p-1"
         >
-          {hidden ? <EyeOff size={16} /> : <Eye size={16} />}
+          {hidden ? <EyeOff size={18} /> : <Eye size={18} />}
         </button>
       </div>
 
       <div
         role="status"
         aria-live="polite"
-        className="text-3xl font-semibold tracking-tight"
+        className="flex items-baseline gap-1"
       >
         {loading ? (
-          <div className="h-8 w-40 rounded bg-zinc-200 dark:bg-zinc-700 animate-pulse" />
-        ) : hidden ? (
-          "••••••"
+          <div className="h-10 w-48 rounded-lg bg-muted animate-pulse" />
         ) : (
-          `₦${balance.toLocaleString()}`
+          <>
+            <span className="text-2xl font-medium text-muted-foreground self-start mt-1">₦</span>
+            <span className="text-4xl font-bold tracking-tighter text-foreground">
+              {hidden ? "••••••" : balance.toLocaleString()}
+            </span>
+          </>
         )}
       </div>
+
+      {/* Quick Status Tag */}
+      {!loading && !hidden && (
+        <div className="mt-4 flex items-center gap-1.5 text-[10px] font-bold uppercase tracking-wide text-secondary">
+          <span className="flex h-1.5 w-1.5 rounded-full bg-secondary animate-pulse" />
+          Live Vault Data
+        </div>
+      )}
     </section>
   )
 }

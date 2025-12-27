@@ -3,7 +3,7 @@
 import { useState, useEffect } from "react"
 import { useTransactions } from "@/context/TransactionContext"
 import { Skeleton } from "@/components/ui/skeleton"
-
+import { ArrowUpRight, ArrowDownLeft, Filter, ArrowUpDown } from "lucide-react"
 
 const transactionsData = [
   { id: "1", date: "2025-12-15", description: "Salary", type: "Credit", amount: 450000, status: "Success" },
@@ -18,77 +18,55 @@ export default function TransactionsTable() {
   const [statusFilter, setStatusFilter] = useState("All")
   const [sortField, setSortField] = useState("date")
   const [sortOrder, setSortOrder] = useState("desc")
+  const [loading, setLoading] = useState(true)
 
   const { transactions } = useTransactions()
   const data = transactions.length > 0 ? transactions : transactionsData
 
+  useEffect(() => {
+    const t = setTimeout(() => setLoading(false), 800)
+    return () => clearTimeout(t)
+  }, [])
 
   const filtered = data
-    .filter((tx) => {
-      return (
-        (typeFilter === "All" || tx.type === typeFilter) &&
-        (statusFilter === "All" || tx.status === statusFilter)
-      )
-    })
+    .filter((tx) => (typeFilter === "All" || tx.type === typeFilter) && (statusFilter === "All" || tx.status === statusFilter))
     .sort((a, b) => {
-      let aValue = a[sortField]
-      let bValue = b[sortField]
-
-      if (sortField === "date") {
-        aValue = new Date(aValue)
-        bValue = new Date(bValue)
-      }
-
-      if (aValue < bValue) return sortOrder === "asc" ? -1 : 1
-      if (aValue > bValue) return sortOrder === "asc" ? 1 : -1
-      return 0
+      let aV = sortField === "date" ? new Date(a[sortField]) : a[sortField]
+      let bV = sortField === "date" ? new Date(b[sortField]) : b[sortField]
+      return sortOrder === "asc" ? (aV > bV ? 1 : -1) : (aV < bV ? 1 : -1)
     })
 
-    const [loading, setLoading] = useState(true)
-
-useEffect(() => {
-  const t = setTimeout(() => setLoading(false), 600)
-  return () => clearTimeout(t)
-}, [])
-  if (loading) {
-    return (
-      <div aria-busy="true" aria-live="polite">
-        <Skeleton className="h-4 w-full" />
-        <Skeleton className="h-4 w-full mt-2" />
-        <Skeleton className="h-4 w-full mt-2" />
-      </div>
-    )
-  }
+  if (loading) return (
+    <div className="space-y-4 p-4">
+      {[...Array(5)].map((_, i) => <Skeleton key={i} className="h-12 w-full rounded-xl bg-muted/50" />)}
+    </div>
+  )
 
   return (
     <section aria-labelledby="transactions-heading">
-      {/* Section title for screen readers */}
-      <h2 id="transactions-heading" className="sr-only">
-        Transactions history
-      </h2>
+      <h2 id="transactions-heading" className="sr-only">Transactions history</h2>
 
-      {/* Filters */}
-      <div className="flex flex-col sm:flex-row gap-3 mb-4">
-        <label className="sr-only" htmlFor="type-filter">Filter by type</label>
+      {/* Modern Filter Bar */}
+      <div className="flex flex-wrap items-center gap-3 mb-6 bg-muted/30 p-2 rounded-xl border border-border/50">
+        <div className="flex items-center gap-2 px-3 text-muted-foreground">
+          <Filter size={14} />
+          <span className="text-xs font-bold uppercase tracking-widest">Filters</span>
+        </div>
+        
         <select
-          id="type-filter"
-          aria-label="Filter transactions by type"
-          className="rounded-lg border border-zinc-300 px-3 py-2 text-sm focus-visible:ring-2 focus-visible:ring-blue-600"
           value={typeFilter}
           onChange={(e) => setTypeFilter(e.target.value)}
+          className="bg-card border border-input rounded-lg px-3 py-1.5 text-xs font-medium focus:ring-2 focus:ring-secondary outline-none"
         >
           <option value="All">All Types</option>
-          <option value="Credit">Credit</option>
-          <option value="Debit">Debit</option>
+          <option value="Credit">Credits (+)</option>
+          <option value="Debit">Debits (-)</option>
         </select>
 
-        <label className="sr-only" htmlFor="status-filter">Filter by status</label>
         <select
-          id="status-filter"
-          aria-label="Filter transactions by status"
-          className="rounded-lg border border-zinc-300 px-3 py-2 text-sm focus-visible:ring-2 focus-visible:ring-blue-600"
           value={statusFilter}
           onChange={(e) => setStatusFilter(e.target.value)}
+          className="bg-card border border-input rounded-lg px-3 py-1.5 text-xs font-medium focus:ring-2 focus:ring-secondary outline-none"
         >
           <option value="All">All Status</option>
           <option value="Success">Success</option>
@@ -96,83 +74,58 @@ useEffect(() => {
           <option value="Failed">Failed</option>
         </select>
 
-        <label className="sr-only" htmlFor="sort-field">Sort transactions by</label>
-        <select
-          id="sort-field"
-          aria-label="Sort transactions by"
-          className="rounded-lg border border-zinc-300 px-3 py-2 text-sm focus-visible:ring-2 focus-visible:ring-blue-600"
-          value={sortField}
-          onChange={(e) => setSortField(e.target.value)}
+        <button 
+          onClick={() => setSortOrder(sortOrder === "asc" ? "desc" : "asc")}
+          className="ml-auto flex items-center gap-2 bg-primary text-primary-foreground px-4 py-1.5 rounded-lg text-xs font-bold transition-all active:scale-95"
         >
-          <option value="date">Date</option>
-          <option value="amount">Amount</option>
-        </select>
-
-        <label className="sr-only" htmlFor="sort-order">Sort order</label>
-        <select
-          id="sort-order"
-          aria-label="Sort order"
-          className="rounded-lg border border-zinc-300 px-3 py-2 text-sm focus-visible:ring-2 focus-visible:ring-blue-600"
-          value={sortOrder}
-          onChange={(e) => setSortOrder(e.target.value)}
-        >
-          <option value="desc">Descending</option>
-          <option value="asc">Ascending</option>
-        </select>
+          <ArrowUpDown size={14} />
+          {sortOrder === "desc" ? "Newest First" : "Oldest First"}
+        </button>
       </div>
 
-      {/* Table */}
-      <div className="rounded-2xl border border-zinc-200 dark:border-zinc-700 bg-white dark:bg-zinc-800 shadow-sm overflow-x-auto">
-        <table
-          role="table"
-          aria-describedby="transactions-heading"
-          className="min-w-full divide-y divide-zinc-200 dark:divide-zinc-700"
-        >
-          <thead className="bg-zinc-50 dark:bg-zinc-900">
-            <tr>
-              <th scope="col" className="px-6 py-3 text-left text-sm font-medium">Date</th>
-              <th scope="col" className="px-6 py-3 text-left text-sm font-medium">Description</th>
-              <th scope="col" className="px-6 py-3 text-left text-sm font-medium">Type</th>
-              <th scope="col" className="px-6 py-3 text-right text-sm font-medium">Amount</th>
-              <th scope="col" className="px-6 py-3 text-left text-sm font-medium">Status</th>
-            </tr>
-          </thead>
-
-          <tbody className="divide-y divide-zinc-200 dark:divide-zinc-700">
-            {filtered.length === 0 && (
+      <div className="rounded-2xl border border-border bg-card shadow-sm overflow-hidden">
+        <div className="overflow-x-auto">
+          <table className="min-w-full divide-y divide-border">
+            <thead className="bg-muted/50">
               <tr>
-                <td colSpan={5} className="px-6 py-4 text-sm text-zinc-500" role="status">
-                  No transactions found.
-                </td>
+                <th className="px-6 py-4 text-left text-[10px] font-bold uppercase tracking-widest text-muted-foreground">Date</th>
+                <th className="px-6 py-4 text-left text-[10px] font-bold uppercase tracking-widest text-muted-foreground">Transaction</th>
+                <th className="px-6 py-4 text-right text-[10px] font-bold uppercase tracking-widest text-muted-foreground">Amount</th>
+                <th className="px-6 py-4 text-center text-[10px] font-bold uppercase tracking-widest text-muted-foreground">Status</th>
               </tr>
-            )}
+            </thead>
 
-            {filtered.map((tx) => (
-              <tr key={tx.id} className="hover:bg-zinc-50 dark:hover:bg-zinc-700">
-                <td className="px-6 py-4 text-sm">{tx.date}</td>
-                <td className="px-6 py-4 text-sm">{tx.description}</td>
-                <td className="px-6 py-4 text-sm">{tx.type}</td>
-                <td className="px-6 py-4 text-sm text-right">
-                  ₦{tx.amount.toLocaleString()}
-                </td>
-                <td className="px-6 py-4 text-sm">
-                  <span
-                    aria-label={`Transaction status: ${tx.status}`}
-                    className={`px-2 py-1 rounded-full text-xs font-medium ${
-                      tx.status === "Success"
-                        ? "bg-green-100 text-green-800 dark:bg-green-800 dark:text-green-100"
-                        : tx.status === "Pending"
-                        ? "bg-yellow-100 text-yellow-800 dark:bg-yellow-800 dark:text-yellow-100"
-                        : "bg-red-100 text-red-800 dark:bg-red-800 dark:text-red-100"
-                    }`}
-                  >
-                    {tx.status}
-                  </span>
-                </td>
-              </tr>
-            ))}
-          </tbody>
-        </table>
+            <tbody className="divide-y divide-border bg-card">
+              {filtered.map((tx) => (
+                <tr key={tx.id} className="hover:bg-muted/20 transition-colors group">
+                  <td className="px-6 py-4 whitespace-nowrap text-sm text-muted-foreground font-medium">
+                    {new Date(tx.date).toLocaleDateString('en-NG', { day: '2-digit', month: 'short' })}
+                  </td>
+                  <td className="px-6 py-4">
+                    <div className="flex items-center gap-3">
+                      <div className={`p-2 rounded-full ${tx.type === 'Credit' ? 'bg-secondary/10 text-secondary' : 'bg-primary/5 text-primary'}`}>
+                        {tx.type === 'Credit' ? <ArrowDownLeft size={16} /> : <ArrowUpRight size={16} />}
+                      </div>
+                      <span className="text-sm font-bold text-foreground tracking-tight group-hover:text-primary transition-colors">
+                        {tx.description}
+                      </span>
+                    </div>
+                  </td>
+                  <td className={`px-6 py-4 text-right text-sm font-bold ${tx.type === 'Credit' ? 'text-secondary' : 'text-foreground'}`}>
+                    {tx.type === 'Credit' ? '+' : '-'}₦{tx.amount.toLocaleString()}
+                  </td>
+                  <td className="px-6 py-4 text-center">
+                    <span className={`inline-flex px-2.5 py-0.5 rounded-full text-[10px] font-bold uppercase tracking-tighter
+                      ${tx.status === "Success" ? "bg-secondary/10 text-secondary" : 
+                        tx.status === "Pending" ? "bg-accent/10 text-accent" : "bg-destructive/10 text-destructive"}`}>
+                      {tx.status}
+                    </span>
+                  </td>
+                </tr>
+              ))}
+            </tbody>
+          </table>
+        </div>
       </div>
     </section>
   )
