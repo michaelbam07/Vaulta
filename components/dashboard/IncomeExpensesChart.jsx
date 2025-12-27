@@ -14,16 +14,16 @@ import {
 import { useTransactions } from "@/context/TransactionContext"
 import { Skeleton } from "@/components/ui/skeleton"
 
-
 const DAYS = ["Sun", "Mon", "Tue", "Wed", "Thu", "Fri", "Sat"]
 const MONTHS = ["Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"]
-const loading = transactions.length === 0
-
 
 export default function IncomeExpensesChart() {
   const { transactions } = useTransactions()
   const [view, setView] = useState("monthly")
 
+  const loading = transactions.length === 0
+
+  // ✅ DATA ONLY
   const data = useMemo(() => {
     const map = {}
 
@@ -92,33 +92,37 @@ export default function IncomeExpensesChart() {
         </div>
       </div>
 
-      {/* Chart */}
-      <ResponsiveContainer width="100%" height={300}>
-        <LineChart data={data}>
-          <CartesianGrid strokeDasharray="3 3" />
-          <XAxis dataKey="label" />
-          <YAxis />
-          <Tooltip />
-          <Legend />
+      {/* ✅ Skeleton OR Chart */}
+      {loading ? (
+        <Skeleton className="h-[300px] w-full" />
+      ) : (
+        <ResponsiveContainer width="100%" height={300}>
+          <LineChart data={data}>
+            <CartesianGrid strokeDasharray="3 3" />
+            <XAxis dataKey="label" />
+            <YAxis />
+            <Tooltip />
+            <Legend />
 
-          <Line
-            type="monotone"
-            dataKey="income"
-            name="Income"
-            stroke="#15803d"
-            strokeWidth={2}
-            dot={false}
-          />
-          <Line
-            type="monotone"
-            dataKey="expenses"
-            name="Expenses"
-            stroke="#b91c1c"
-            strokeWidth={2}
-            dot={false}
-          />
-        </LineChart>
-      </ResponsiveContainer>
+            <Line
+              type="monotone"
+              dataKey="income"
+              name="Income"
+              stroke="#15803d"
+              strokeWidth={2}
+              dot={false}
+            />
+            <Line
+              type="monotone"
+              dataKey="expenses"
+              name="Expenses"
+              stroke="#b91c1c"
+              strokeWidth={2}
+              dot={false}
+            />
+          </LineChart>
+        </ResponsiveContainer>
+      )}
     </section>
   )
 }

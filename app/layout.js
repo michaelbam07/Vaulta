@@ -5,6 +5,7 @@ import { AuthProvider } from "@/context/AuthContext";
 import { NotificationProvider } from "@/context/NotificationContext";
 import { BalanceProvider } from "@/context/BalanceContext";
 import { TransactionProvider } from "@/context/TransactionContext";
+import { SecurityProvider } from "@/context/SecurityContext";
 
 const geistSans = Geist({
   variable: "--font-geist-sans",
@@ -43,11 +44,13 @@ export default function RootLayout({ children }) {
           <AuthProvider>
             <NotificationProvider>
               <TransactionProvider>
-                <BalanceProvider>
-                  <main id="main" role="main">
-                    {children}
-                  </main>
-                </BalanceProvider>
+                <SecurityProvider>
+                  <BalanceProvider>
+                    <><main id="main" role="main">
+                      {children}
+                    </main></>
+                  </BalanceProvider>
+                </SecurityProvider>
               </TransactionProvider>
             </NotificationProvider>
           </AuthProvider>

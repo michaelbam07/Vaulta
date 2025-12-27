@@ -1,6 +1,6 @@
 "use client"
 
-import { useState } from "react"
+import { useState, useEffect } from "react"
 import { useTransactions } from "@/context/TransactionContext"
 import { Skeleton } from "@/components/ui/skeleton"
 
